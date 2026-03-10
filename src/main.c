@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include <string.h>
-#define NB 4
+#define NB 3
 #define Button_L 200
 #define Button_H 50
 #define Button_Offset 25
@@ -18,7 +18,10 @@ void Draw_Buttons(button *buttons, int H)
     Color culoare[] = { BLUE, YELLOW, RED, GREEN};
     int i;
     for(i = 0 ; i < NB; i++){
-        DrawRectangle(buttons[i].xb, H - Button_Offset - Button_H , Button_L, Button_H, culoare[NB - 1 - i]);
+        Rectangle rec = {buttons[i].xb, H - Button_Offset - Button_H , Button_L, Button_H};
+        DrawRectangleRec(rec, culoare[NB - 1 - i]);
+        DrawRectangleLinesEx(rec, 3, BLACK);
+        DrawText(buttons[i].s, buttons[i].xb + Button_Offset / 2, H - Button_Offset - Button_H + 12, 20, BLACK);
     }
 }
 
