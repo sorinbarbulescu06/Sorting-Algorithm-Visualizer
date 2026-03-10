@@ -12,12 +12,20 @@
 #define Height 720
 #define Bar_Number 175
 #define Bar_Width 5
+#define Bar_Offset 60
+
 typedef struct button
 {
     char *s;
     Rectangle Coord;
     Color col;
 }button;
+
+typedef struct bar
+{
+    Color col;
+    Rectangle Coord;
+} bar;
 
 void Draw_Buttons(button *buttons)
 {
@@ -29,18 +37,21 @@ void Draw_Buttons(button *buttons)
     }
 }
 
-void Draw_Bars()
+void Draw_Bars(bar *bars)
 {
-    
+    int i;
+    for(i = 0 ; i < Bar_Number; i++){
+        DrawRectangleRec(bars[i].Coord, bars[i].col);
+    }
 }
 
-void Draw(button *buttons, int Array_exists)
+void Draw(button *buttons, int Array_exists, bar *bars)
 {
     BeginDrawing();
     ClearBackground(DARKGRAY);
     Draw_Buttons(buttons);
     if(Array_exists == 1){
-        Draw_Bars();
+        Draw_Bars(bars);
     }
     EndDrawing();
 }
@@ -79,16 +90,29 @@ button* Init()
     return buttons;
 }
 
-int* generate()
+bar* generate()
 {
     int i;
-    int *v = malloc(Bar_Number * sizeof(int));
+    int MaxBar_Height = Height - Button_Offset - Button_H - 2 * Bar_Offset;
+    int Blank_Space = (Width - Bar_Number * Bar_Width) / 2;
+    bar *bars = malloc(Bar_Number * sizeof(bar));
     for(i = 0; i < Bar_Number; i++){
-
+        bars[i].Coord.height = (i + 1) * (MaxBar_Height / Bar_Number);
+        bars[i].col = WHITE;
+        bars[i].Coord.width = Bar_Width;
+        bars[i].Coord.y = Bar_Offset + (MaxBar_Height - bars[i].Coord.height);
+        bars[i].Coord.x = Blank_Space + i * Bar_Width;
     }
+    for(i = Bar_Number - 1; i > 0; i--){
+        int j = GetRandomValue(0, i);
+        int aux = bars[i].Coord.x;
+        bars[i].Coord.x = bars[j].Coord.x;
+        bars[j].Coord.x = aux;
+    }
+    return bars;
 }
 
-void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, int *v)
+void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
 {
     Vector2 Mouse_Pos = GetMousePosition();
     int i, ind = -1;
@@ -107,7 +131,10 @@ void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, int *v)
     else
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     if(ind == 0){
-        v =generate();
+        if(*Array_Exists == 1){
+            free(*bars);
+        }
+        *bars = generate();
         *Array_Exists = 1;
     }
     if(ind == 1){
@@ -124,12 +151,12 @@ int main()
     int i;
     int Button_Pressed = 0;
     int Array_Exists = 0;
-    int *v;
+    bar *bars;
     button *buttons;
     buttons = Init();
     while(!WindowShouldClose()){
-        CheckAndDo_Button_Pressed(buttons, &Array_Exists, v);
-        Draw(buttons, Array_Exists);
+        CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars);
+        Draw(buttons, Array_Exists, bars);
     }
     for(i = 0; i < NB; i++)
         free(buttons[i].s);
