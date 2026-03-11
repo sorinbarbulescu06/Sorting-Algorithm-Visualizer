@@ -105,11 +105,42 @@ bar* generate()
     }
     for(i = Bar_Number - 1; i > 0; i--){
         int j = GetRandomValue(0, i);
-        int aux = bars[i].Coord.x;
-        bars[i].Coord.x = bars[j].Coord.x;
-        bars[j].Coord.x = aux;
+        int aux1 = bars[i].Coord.y, aux2= bars[i].Coord.height;
+        bars[i].Coord.y = bars[j].Coord.y;
+        bars[j].Coord.y = aux1;
+        bars[i].Coord.height = bars[j].Coord.height;
+        bars[j].Coord.height = aux2;
     }
     return bars;
+}
+
+void StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
+{
+    SetTargetFPS(720);
+    int i,j;
+    for(i = 0; i < Bar_Number - 1; i++){
+        bars[i].col = RED;
+        Draw(buttons, Array_Exists, bars);
+        for(j = i + 1; j < Bar_Number; j++){
+            bars[j].col = RED;
+            Draw(buttons, Array_Exists, bars);
+            if(bars[i].Coord.height > bars[j].Coord.height){
+                int aux1 = bars[i].Coord.y, aux2= bars[i].Coord.height;
+                bars[i].Coord.y = bars[j].Coord.y;
+                bars[j].Coord.y = aux1;
+                bars[i].Coord.height = bars[j].Coord.height;
+                bars[j].Coord.height = aux2;
+            }
+            Draw(buttons, Array_Exists, bars);
+            bars[j].col = WHITE;
+            
+        }
+        bars[i].col = GREEN;
+        Draw(buttons, Array_Exists, bars);
+    }
+    bars[Bar_Number - 1].col = GREEN;
+    Draw(buttons, Array_Exists, bars);
+    SetTargetFPS(FPS);
 }
 
 void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
@@ -137,8 +168,8 @@ void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
         *bars = generate();
         *Array_Exists = 1;
     }
-    if(ind == 1){
-   //     StartBubbleSort();
+    if(ind == 1 && *Array_Exists == 1){
+        StartBubbleSort(*bars, *Array_Exists, buttons);
     }
     if(ind == 2){
   //      StartQuickSort();
