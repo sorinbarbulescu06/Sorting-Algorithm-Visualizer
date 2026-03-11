@@ -1,5 +1,14 @@
 #include "Sort_Core.h"
 
+void Swap_Bars(Rectangle *a, Rectangle *b)
+{
+        int aux1 = a->y, aux2= a->height;
+        a->y = b->y;
+        b->y = aux1;
+        a->height = b->height;
+        b->height = aux2;
+}
+
 void Draw_Buttons(button *buttons)
 {
     int i;
@@ -78,11 +87,7 @@ bar* generate()
     }
     for(i = Bar_Number - 1; i > 0; i--){
         int j = GetRandomValue(0, i);
-        int aux1 = bars[i].Coord.y, aux2= bars[i].Coord.height;
-        bars[i].Coord.y = bars[j].Coord.y;
-        bars[j].Coord.y = aux1;
-        bars[i].Coord.height = bars[j].Coord.height;
-        bars[j].Coord.height = aux2;
+        Swap_Bars(&bars[i].Coord, &bars[j].Coord);
     }
     return bars;
 }
@@ -100,11 +105,7 @@ int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
             bars[j].col = RED;
             Draw(buttons, Array_Exists, bars);
             if(bars[i].Coord.height > bars[j].Coord.height){
-                int aux1 = bars[i].Coord.y, aux2= bars[i].Coord.height;
-                bars[i].Coord.y = bars[j].Coord.y;
-                bars[j].Coord.y = aux1;
-                bars[i].Coord.height = bars[j].Coord.height;
-                bars[j].Coord.height = aux2;
+                Swap_Bars(&bars[i].Coord, &bars[j].Coord);
             }
             Draw(buttons, Array_Exists, bars);
             bars[j].col = WHITE;
@@ -117,6 +118,40 @@ int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
     Draw(buttons, Array_Exists, bars);
     SetTargetFPS(FPS);
     return 1;
+}
+
+void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int st)
+{
+    if(st >= pivot){
+        bars[st].col = GREEN;
+        Draw(buttons, Array_Exists, bars);
+        if(WindowShouldClose() != 0)
+            exit(1);
+    }
+    else{
+        int i;
+        int cnt = st;
+        bars[pivot].col = RED;
+        Draw(buttons, Array_Exists, bars);
+        for(i = st; i < pivot; i++){
+            bars[i].col = RED;
+            Draw(buttons, Array_Exists, bars);
+            if(WindowShouldClose() != 0)
+                    exit(1);
+            if(bars[i].Coord.height < bars[pivot].Coord.height){
+                Swap_Bars(&bars[i].Coord, &bars[cnt].Coord);
+                Draw(buttons, Array_Exists, bars);
+                cnt++;
+            }
+            bars[i].col = WHITE;
+        }
+        bars[pivot].col = WHITE;
+        Swap_Bars(&bars[cnt].Coord, &bars[pivot].Coord);
+        bars[cnt].col = GREEN;
+        Draw(buttons, Array_Exists, bars);
+        StartQuickSort(bars, Array_Exists, buttons, cnt - 1, st);
+        StartQuickSort(bars, Array_Exists, buttons, pivot, cnt + 1);
+    }   
 }
 
 int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
@@ -137,6 +172,7 @@ int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
     }
     else
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    int close = -1;
     if(ind == 0){
         if(*Array_Exists == 1){
             free(*bars);
@@ -146,13 +182,13 @@ int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
     }
     if(ind == 1 && *Array_Exists == 1){
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        int close = -1;
         close = StartBubbleSort(*bars, *Array_Exists, buttons);
         if(close == 0)
             return 0;
     }
-    if(ind == 2){
-  //      StartQuickSort();
+    if(ind == 2 && *Array_Exists == 1){
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        StartQuickSort(*bars, *Array_Exists, buttons, Bar_Number - 1, 0);
     }
     return 1;
 }

@@ -27,6 +27,7 @@ typedef struct bar
     Rectangle Coord;
 } bar;
 
+void Swap_Bars(Rectangle *a, Rectangle *b);
 void Draw_Buttons(button *buttons);
 void Draw_Bars(bar *bars);
 void Draw(button *buttons, int Array_exists, bar *bars);
@@ -34,4 +35,5 @@ button* button_init();
 button* Init();
 bar* generate();
 int StartBubbleSort(bar *bars, int Array_Exists, button *buttons);
+void StartQuickSort(bar *bars, int Array_Exists, button *buttons,int pivot,int st);
 int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars);
