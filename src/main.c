@@ -114,7 +114,7 @@ bar* generate()
     return bars;
 }
 
-void StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
+int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
 {
     SetTargetFPS(720);
     int i,j;
@@ -122,6 +122,8 @@ void StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
         bars[i].col = RED;
         Draw(buttons, Array_Exists, bars);
         for(j = i + 1; j < Bar_Number; j++){
+            if(WindowShouldClose() != 0)
+                return 0;
             bars[j].col = RED;
             Draw(buttons, Array_Exists, bars);
             if(bars[i].Coord.height > bars[j].Coord.height){
@@ -141,9 +143,10 @@ void StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
     bars[Bar_Number - 1].col = GREEN;
     Draw(buttons, Array_Exists, bars);
     SetTargetFPS(FPS);
+    return 1;
 }
 
-void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
+int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
 {
     Vector2 Mouse_Pos = GetMousePosition();
     int i, ind = -1;
@@ -169,11 +172,16 @@ void CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
         *Array_Exists = 1;
     }
     if(ind == 1 && *Array_Exists == 1){
-        StartBubbleSort(*bars, *Array_Exists, buttons);
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        int close = -1;
+        close = StartBubbleSort(*bars, *Array_Exists, buttons);
+        if(close == 0)
+            return 0;
     }
     if(ind == 2){
   //      StartQuickSort();
     }
+    return 1;
 }
 
 
@@ -186,11 +194,15 @@ int main()
     button *buttons;
     buttons = Init();
     while(!WindowShouldClose()){
-        CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars);
+        int close = -1;
+        close = CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars);
+        if(close == 0)
+            break;
         Draw(buttons, Array_Exists, bars);
     }
     for(i = 0; i < NB; i++)
         free(buttons[i].s);
+    free(bars);
     free(buttons);
     CloseWindow();
     return 0;
