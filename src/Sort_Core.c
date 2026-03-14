@@ -9,10 +9,15 @@ void Swap_Bars(Rectangle *a, Rectangle *b)
         b->height = aux2;
 }
 
-void Draw_Buttons(button *buttons)
+void Draw_Buttons(button *buttons, int sorting)
 {
     int i;
-    for(i = 0 ; i < NB; i++){
+    int n;
+    if(sorting == 1)
+        n = NB + 1;
+    else
+        n = NB;
+    for(i = 0 ; i < n; i++){
         DrawRectangleRec(buttons[i].Coord, buttons[i].col);
         DrawRectangleLinesEx(buttons[i].Coord, 3, BLACK);
         DrawText(buttons[i].s, buttons[i].Coord.x + Button_Offset / 2, buttons[i].Coord.y + 12, 20, BLACK);
@@ -27,11 +32,11 @@ void Draw_Bars(bar *bars)
     }
 }
 
-void Draw(button *buttons, int Array_exists, bar *bars)
+void Draw(button *buttons, int Array_exists, int sorting, bar *bars)
 {
     BeginDrawing();
     ClearBackground(DARKGRAY);
-    Draw_Buttons(buttons);
+    Draw_Buttons(buttons, sorting);
     if(Array_exists == 1){
         Draw_Bars(bars);
     }
@@ -40,7 +45,7 @@ void Draw(button *buttons, int Array_exists, bar *bars)
 
 button* button_init()
 {
-    button *buttons = malloc(NB*sizeof(button));
+    button *buttons = malloc((NB + 1)*sizeof(button));
     if(buttons == NULL){
         exit(1);
     }
@@ -61,6 +66,16 @@ button* button_init()
     buttons[0].col = RED;
     buttons[1].col = YELLOW;
     buttons[2].col = BLUE;
+
+    buttons[NB].Coord.x = 50;
+    buttons[NB].Coord.y = 50;
+    buttons[NB].Coord.height = 50;
+    buttons[NB].Coord.width = 100;
+    buttons[NB].col = RED;
+    buttons[NB].s = malloc(16 * sizeof(char));
+    if(buttons[NB].s == NULL)
+        exit(1);
+    strcpy(buttons[NB].s, "Cancel");
     return buttons;
 }
 
@@ -94,28 +109,28 @@ bar* generate()
 
 int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
 {
-    SetTargetFPS(720);
+    SetTargetFPS(FPS * 12);
     int i,j;
     for(i = 0; i < Bar_Number - 1; i++){
         bars[i].col = RED;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 1, bars);
         for(j = i + 1; j < Bar_Number; j++){
             if(WindowShouldClose() != 0)
                 return 0;
             bars[j].col = RED;
-            Draw(buttons, Array_Exists, bars);
+            Draw(buttons, Array_Exists, 1, bars);
             if(bars[i].Coord.height > bars[j].Coord.height){
                 Swap_Bars(&bars[i].Coord, &bars[j].Coord);
             }
-            Draw(buttons, Array_Exists, bars);
+            Draw(buttons, Array_Exists, 1, bars);
             bars[j].col = WHITE;
             
         }
         bars[i].col = GREEN;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 1,bars);
     }
     bars[Bar_Number - 1].col = GREEN;
-    Draw(buttons, Array_Exists, bars);
+    Draw(buttons, Array_Exists, 0, bars);
     SetTargetFPS(FPS);
     return 1;
 }
@@ -124,7 +139,7 @@ void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int 
 {
     if(st >= pivot){
         bars[st].col = GREEN;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 1,bars);
         if(WindowShouldClose() != 0)
             exit(1);
     }
@@ -132,15 +147,15 @@ void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int 
         int i;
         int cnt = st;
         bars[pivot].col = RED;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 1,bars);
         for(i = st; i < pivot; i++){
             bars[i].col = RED;
-            Draw(buttons, Array_Exists, bars);
+            Draw(buttons, Array_Exists, 1, bars);
             if(WindowShouldClose() != 0)
                     exit(1);
             if(bars[i].Coord.height < bars[pivot].Coord.height){
                 Swap_Bars(&bars[i].Coord, &bars[cnt].Coord);
-                Draw(buttons, Array_Exists, bars);
+                Draw(buttons, Array_Exists, 1, bars);
                 cnt++;
             }
             bars[i].col = WHITE;
@@ -148,7 +163,7 @@ void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int 
         bars[pivot].col = WHITE;
         Swap_Bars(&bars[cnt].Coord, &bars[pivot].Coord);
         bars[cnt].col = GREEN;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 1, bars);
         StartQuickSort(bars, Array_Exists, buttons, cnt - 1, st);
         StartQuickSort(bars, Array_Exists, buttons, pivot, cnt + 1);
     }   

@@ -28,9 +28,9 @@ typedef struct bar
 } bar;
 
 void Swap_Bars(Rectangle *a, Rectangle *b);
-void Draw_Buttons(button *buttons);
+void Draw_Buttons(button *buttons, int sorting);
 void Draw_Bars(bar *bars);
-void Draw(button *buttons, int Array_exists, bar *bars);
+void Draw(button *buttons, int Array_exists,int sorting, bar *bars);
 button* button_init();
 button* Init();
 bar* generate();

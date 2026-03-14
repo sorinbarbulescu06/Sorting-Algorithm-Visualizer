@@ -13,7 +13,7 @@ int main()
         close = CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars);
         if(close == 0)
             break;
-        Draw(buttons, Array_Exists, bars);
+        Draw(buttons, Array_Exists, 0, bars);
     }
     for(i = 0; i < NB; i++)
         free(buttons[i].s);
