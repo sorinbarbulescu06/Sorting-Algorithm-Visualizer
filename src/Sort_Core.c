@@ -117,6 +117,8 @@ int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
         for(j = i + 1; j < Bar_Number; j++){
             if(WindowShouldClose() != 0)
                 return 0;
+            if(CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars, 1) == 1)
+                return 2;
             bars[j].col = RED;
             Draw(buttons, Array_Exists, 1, bars);
             if(bars[i].Coord.height > bars[j].Coord.height){
@@ -135,13 +137,17 @@ int StartBubbleSort(bar *bars, int Array_Exists, button *buttons)
     return 1;
 }
 
-void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int st)
+int StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int st)
 {
+    if(CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars, 1) == 1)
+        return 2;
+
     if(st >= pivot){
         bars[st].col = GREEN;
         Draw(buttons, Array_Exists, 1,bars);
         if(WindowShouldClose() != 0)
             exit(1);
+        return 0;
     }
     else{
         int i;
@@ -149,6 +155,8 @@ void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int 
         bars[pivot].col = RED;
         Draw(buttons, Array_Exists, 1,bars);
         for(i = st; i < pivot; i++){
+            if(CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars, 1) == 1)
+                return 2;
             bars[i].col = RED;
             Draw(buttons, Array_Exists, 1, bars);
             if(WindowShouldClose() != 0)
@@ -164,46 +172,70 @@ void StartQuickSort(bar *bars, int Array_Exists, button *buttons, int pivot,int 
         Swap_Bars(&bars[cnt].Coord, &bars[pivot].Coord);
         bars[cnt].col = GREEN;
         Draw(buttons, Array_Exists, 1, bars);
-        StartQuickSort(bars, Array_Exists, buttons, cnt - 1, st);
-        StartQuickSort(bars, Array_Exists, buttons, pivot, cnt + 1);
+        if(StartQuickSort(bars, Array_Exists, buttons, cnt - 1, st) == 2)
+            return 2;
+            
+        if(StartQuickSort(bars, Array_Exists, buttons, pivot, cnt + 1) == 2)
+            return 2;
     }   
+    return 0;
 }
 
-int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars)
+int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars,int sorting)
 {
     Vector2 Mouse_Pos = GetMousePosition();
     int i, ind = -1;
     bool Hover = false;
-    for(i = 0; i < NB; i++){
-        if(CheckCollisionPointRec(Mouse_Pos, buttons[i].Coord)){
-            Hover = true;
-            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
-                ind = i;
+    if(sorting == 0){
+        for(i = 0; i < NB; i++){
+            if(CheckCollisionPointRec(Mouse_Pos, buttons[i].Coord)){
+                Hover = true;
+                if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+                    ind = i;
+                }
             }
         }
-    }
-    if(Hover == true){
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-    }
-    else
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-    int close = -1;
-    if(ind == 0){
-        if(*Array_Exists == 1){
-            free(*bars);
+        if(Hover == true){
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         }
-        *bars = generate();
-        *Array_Exists = 1;
+        else
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        int close = -1;
+        if(ind == 0){
+            if(*Array_Exists == 1){
+                free(*bars);
+            }
+            *bars = generate();
+            *Array_Exists = 1;
+        }
+        if(ind == 1 && *Array_Exists == 1){
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            close = StartBubbleSort(*bars, *Array_Exists, buttons);
+            if(close == 0)
+                return 0;
+            if(close == 2)
+                *bars = generate();
+        }
+        if(ind == 2 && *Array_Exists == 1){
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            close = StartQuickSort(*bars, *Array_Exists, buttons, Bar_Number - 1, 0);
+            if(close == 2)
+                *bars = generate();
+        }
+        return 1;
     }
-    if(ind == 1 && *Array_Exists == 1){
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        close = StartBubbleSort(*bars, *Array_Exists, buttons);
-        if(close == 0)
-            return 0;
+    else{
+        if(CheckCollisionPointRec(Mouse_Pos, buttons[NB].Coord)){
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+                generate();
+                *bars = generate();
+                return 1;
+            }
+        }
+        else{
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
     }
-    if(ind == 2 && *Array_Exists == 1){
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        StartQuickSort(*bars, *Array_Exists, buttons, Bar_Number - 1, 0);
-    }
-    return 1;
 }

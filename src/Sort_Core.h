@@ -35,5 +35,5 @@ button* button_init();
 button* Init();
 bar* generate();
 int StartBubbleSort(bar *bars, int Array_Exists, button *buttons);
-void StartQuickSort(bar *bars, int Array_Exists, button *buttons,int pivot,int st);
-int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars);
+int StartQuickSort(bar *bars, int Array_Exists, button *buttons,int pivot,int st);
+int CheckAndDo_Button_Pressed(button *buttons, int *Array_Exists, bar **bars,int sorting);

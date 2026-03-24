@@ -10,7 +10,7 @@ int main()
     buttons = Init();
     while(!WindowShouldClose()){
         int close = -1;
-        close = CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars);
+        close = CheckAndDo_Button_Pressed(buttons, &Array_Exists, &bars, 0);
         if(close == 0)
             break;
         Draw(buttons, Array_Exists, 0, bars);
